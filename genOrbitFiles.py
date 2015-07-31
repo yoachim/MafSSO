@@ -1,26 +1,33 @@
+#! /usr/bin/env python
 import numpy as np
 import matplotlib.pyplot as plt
-from moObs import MoObs
+from moObs import MoObs, runMoObs
 from lsst.sims.maf.db import OpsimDatabase
-import os
+import os, argparse
 
 # Gererate the orbit files for each opsim run
 
-runNames = ['ops2_1094', 'enigma_1257',
-            'enigma_1258','enigma_1259','enigma_1189']
+#runNames = ['ops2_1094', 'enigma_1257',
+#            'enigma_1258','enigma_1259','enigma_1189']
 
-useCamera=False
+def runThem(runName):
+    useCamera=True
 
-orbitfile = 'pha20141031.des'
-moo = MoObs()
+    orbitfile = 'pha20141031.des'
 
-dbcols = ['expMJD', 'night', 'fieldRA', 'fieldDec', 'rotSkyPos', 'filter',
-          'finSeeing', 'fiveSigmaDepth', 'visitExpTime', 'solarElong']
 
-for runName in runNames:
+    dbcols = ['expMJD', 'night', 'fieldRA', 'fieldDec', 'rotSkyPos', 'filter',
+              'finSeeing', 'fiveSigmaDepth', 'visitExpTime', 'solarElong']
+
     print 'Generating orbit file for %s' % runName
+    outfilename = runName+'_out.txt'
+    runMoObs(orbitfile, outfilename,
+             '/Users/yoachim/Scratch/Opsim_sqlites/'+runName+'_sqlite.db',
+             dbcols=dbcols, useCamera=useCamera)
+if __name__=="__main__":
 
-    outfileName = runName+'_out.txt'
-    moo.runMoObs(orbitfile, outfilename,
-                 '/Users/yoachim/Scratch/Opsim_sqlites/'+runName+'_sqlite.db',
-                 dbcols=dbcols, useCamera=useCamera)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('runName', type=str, default=None)
+    args, extras = parser.parse_known_args()
+
+    runThem(args.runName)
